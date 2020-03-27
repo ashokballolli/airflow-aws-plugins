@@ -1,6 +1,6 @@
 from airflow import DAG
 from airflow.operators.bash_operator import BashOperator
-from aws_operators.operators.lambda_operators import ExecuteLambdaOperator
+from aws_operators.operators._lambda_operators import ExecuteLambdaOperator
 from datetime import datetime
 
 
