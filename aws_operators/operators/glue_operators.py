@@ -1,4 +1,5 @@
 from airflow.models import BaseOperator
+from airflow.exceptions import AirflowException
 from airflow.utils import apply_defaults
 import logging
 import boto3
@@ -44,10 +45,8 @@ class StartGlueJobRunOperator(BaseOperator):
                 time.sleep(self.polling_interval)
             elif (job_status in ['STOPPING','STOPPED','FAILED','TIMEOUT']):
                 logging.error("Something went wrong. Check AWS Logs. Exiting.") 
-                sys.exit(1)
-                break
+                raise AirflowException('AWS Glue Job Run Failed')
             else:
-                sys.exit(0)
                 break
 
 class StartGlueWorkflowRunOperator(BaseOperator):
@@ -89,10 +88,8 @@ class StartGlueWorkflowRunOperator(BaseOperator):
                 time.sleep(self.polling_interval)
             elif (workflow_status in ['STOPPING','STOPPED','FAILED','TIMEOUT']):
                 logging.error("Something went wrong. Check AWS Logs. Exiting.") 
-                sys.exit(1)
-                break
+                raise AirflowException('AWS Glue Workflow Run Failed')
             else:
-                sys.exit(0)
                 break
 
 class StartGlueCrawlerRunOperator(BaseOperator):
@@ -131,7 +128,7 @@ class StartGlueCrawlerRunOperator(BaseOperator):
             logging.info("Crawler Status: " + str(crawler_status))
 
             # Possible values --> 'State': 'READY'|'RUNNING'|'STOPPING'
-            if (crawler_status in ['RUNNING']):
+            if (crawler_status in ['RUNNING']): 
                 time.sleep(self.polling_interval)
             elif (crawler_status in ['STOPPING', 'READY']):
                 last_crawl_at_stopping = self.glue_client.get_crawler(Name=self.crawler_name)['Crawler']['LastCrawl']
@@ -142,10 +139,8 @@ class StartGlueCrawlerRunOperator(BaseOperator):
 
                     # Possible values --> 'Status': 'SUCCEEDED'|'CANCELLED'|'FAILED'
                     if (final_status in ['SUCCEEDED']):
-                        sys.exit(0)
                         break
                     else:
                         logging.error("Something went wrong. Check AWS Logs. Exiting.") 
-                        sys.exit(1)
-                        break
+                        raise AirflowException('AWS Crawler Job Run Failed')
 
