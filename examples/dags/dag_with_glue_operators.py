@@ -13,7 +13,7 @@ default_args = {
     'retry_delay': timedelta(minutes=5),
 }
 dag = DAG(
-    'dag_with_glue_operators.py',
+    'dag_with_glue_operators',
     default_args=default_args,
     description='Sample DAG with AWS Glue operators',
     schedule_interval=None,
