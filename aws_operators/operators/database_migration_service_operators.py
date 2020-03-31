@@ -20,9 +20,10 @@ class StartDMSReplicationTaskOperator(BaseOperator):
             **kwargs
     ):
         """
-        Trigger AWS Glue Job function
+        Trigger AWS Data Migration Services Replication Task function
 
-        :param job_name: the name of the Glue job to start and monitor
+        :param replication_task_arn: The Amazon Resource Name (ARN) of the replication task to be started
+        :param start_replication_task_type: The type of replication task. Possible Values include start-replication, resume-processing, reload-target
         :param polling_interval: time interval, in seconds, to check the status of the job
         """
         super(StartDMSReplicationTaskOperator, self).__init__(*args, **kwargs)
