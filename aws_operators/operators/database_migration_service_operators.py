@@ -7,7 +7,6 @@ import logging
 import time
 
 
-
 class StartDMSReplicationTaskOperator(BaseOperator):
 
     ui_color = '#ff9900'

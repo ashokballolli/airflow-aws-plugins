@@ -164,7 +164,8 @@ class ExecuteCopyToRedshiftOperator(BaseOperator):
 
     def __delete_from_table(self, context):
         condition = self.where_condition_fn(context)
-        query = "DELETE FROM {} WHERE {}".format(self.full_table_name, condition)
+        query = "DELETE FROM {} WHERE {}".format(
+            self.full_table_name, condition)
         self.__execute_query(query)
 
     def __execute_copy(self, context):
@@ -173,7 +174,8 @@ class ExecuteCopyToRedshiftOperator(BaseOperator):
 
     def __construct_copy_query(self, context):
         additional_params = '\n'.join(self.copy_params)
-        s3_key = self.s3_key if type(self.s3_key) == str else self.s3_key(context)
+        s3_key = self.s3_key if type(
+            self.s3_key) == str else self.s3_key(context)
         return """
         COPY {table}
         FROM 's3://{bucket}/{key}'
@@ -213,7 +215,8 @@ class ExecuteUnloadFromRedshiftOperator(BaseOperator):
         :param unload_params: additional UNLOAD command parameters
         """
 
-        super(ExecuteUnloadFromRedshiftOperator, self).__init__(*args, **kwargs)
+        super(ExecuteUnloadFromRedshiftOperator,
+              self).__init__(*args, **kwargs)
         self.pg_hook = PostgresHook(redshift_conn_id)
         self.select_statement = select_statement
         self.s3_bucket = s3_bucket
@@ -223,7 +226,8 @@ class ExecuteUnloadFromRedshiftOperator(BaseOperator):
 
     def execute(self, context):
         additional_params = '\n'.join(self.unload_params)
-        s3_key = self.s3_key if type(self.s3_key) == str else self.s3_key(context)
+        s3_key = self.s3_key if type(
+            self.s3_key) == str else self.s3_key(context)
         query = """
         UNLOAD ('{select_statement}')
         TO 's3://{bucket}/{key}'
@@ -255,7 +259,8 @@ class ExecuteAnalyzeRedshiftTableOperator(BaseOperator):
         :param redshift_conn_id: the destination redshift connection id
         :param full_table_name: full Redshift table name to analyze
         """
-        super(ExecuteAnalyzeRedshiftTableOperator, self).__init__(*args, **kwargs)
+        super(ExecuteAnalyzeRedshiftTableOperator,
+              self).__init__(*args, **kwargs)
         self.redshift_conn_id = redshift_conn_id
         self.full_table_name = full_table_name
 

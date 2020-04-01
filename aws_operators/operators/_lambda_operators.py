@@ -31,12 +31,14 @@ class ExecuteLambdaOperator(BaseOperator):
         self.airflow_context_to_lambda_payload = airflow_context_to_lambda_payload
         self.additional_payload = additional_payload
         self.lambda_function_name = lambda_function_name
-        self.lambda_client = boto3.client('lambda', config=Config(read_timeout=300, connect_timeout=300))
+        self.lambda_client = boto3.client(
+            'lambda', config=Config(read_timeout=300, connect_timeout=300))
 
     def execute(self, context):
         request_payload = self.__create_lambda_payload(context)
 
-        logging.info('Executing AWS Lambda {} with payload {}'.format(self.lambda_function_name, request_payload))
+        logging.info('Executing AWS Lambda {} with payload {}'.format(
+            self.lambda_function_name, request_payload))
 
         response = self.lambda_client.invoke(
             FunctionName=self.lambda_function_name,
@@ -49,8 +51,10 @@ class ExecuteLambdaOperator(BaseOperator):
         response_payload = json.loads(response.get('Payload').read())
         response_code = response.get('StatusCode')
 
-        log_msg_logs = 'Tail of logs from AWS Lambda:\n{logs}'.format(logs=response_log_tail)
-        log_msg_payload = 'Response payload from AWS Lambda:\n{resp}'.format(resp=response_payload)
+        log_msg_logs = 'Tail of logs from AWS Lambda:\n{logs}'.format(
+            logs=response_log_tail)
+        log_msg_payload = 'Response payload from AWS Lambda:\n{resp}'.format(
+            resp=response_payload)
 
         if response_code == 200:
             logging.info(log_msg_logs)
@@ -62,6 +66,7 @@ class ExecuteLambdaOperator(BaseOperator):
             raise AirflowException('Lambda invoke failed')
 
     def __create_lambda_payload(self, context):
-        payload = self.airflow_context_to_lambda_payload(context) if self.airflow_context_to_lambda_payload is not None else {}
+        payload = self.airflow_context_to_lambda_payload(
+            context) if self.airflow_context_to_lambda_payload is not None else {}
         payload.update(self.additional_payload)
         return payload
