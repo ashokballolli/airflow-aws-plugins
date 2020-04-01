@@ -1,0 +1,101 @@
+Description: "EC2 instance with airflow for testing"
+Parameters:
+  Ec2VPC:
+    Type: 'AWS::EC2::VPC::Id'
+    Description: VPC for EC2 instance
+  Ec2Subnet:
+    Type: 'AWS::EC2::Subnet::Id'
+    Description: Subnet for EC2 instance
+  KeyName:
+    Type: 'AWS::EC2::KeyPair::KeyName'
+    Description: Key Pair for EC2 instance
+Mappings:
+  RegionMap:
+    eu-central-1:
+      "AMI": "ami-a058674b"
+Resources:
+  AirflowRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: "AirflowRole"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: "root"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              -
+                Effect: "Allow"
+                Action:
+                  - "lambda:InvokeFunction"
+                Resource: "*"
+      Path: "/"
+  AirflowInstanceProfile:
+    Type: "AWS::IAM::InstanceProfile"
+    Properties:
+      Path: "/"
+      Roles:
+        -
+          Ref: "AirflowRole"
+  AirflowSecurityGroup:
+    Type: "AWS::EC2::SecurityGroup"
+    Properties:
+      GroupName: "AirflowSecurityGroup"
+      GroupDescription: Allow access to airflow
+      VpcId: !Ref Ec2VPC
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          CidrIp: 0.0.0.0/0
+          Description: "Access to airflow webserver"
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: 10.0.0.0/0
+          Description: "SSH access to airflow"
+  AirflowInstance:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      ImageId:
+        Fn::FindInMap:
+          - "RegionMap"
+          - Ref: "AWS::Region"
+          - "AMI"
+      InstanceType: "t2.micro"
+      KeyName: !Ref KeyName
+      NetworkInterfaces:
+        - DeviceIndex: "0"
+          GroupSet:
+            - !Ref "AirflowSecurityGroup"
+          SubnetId: !Ref "Ec2Subnet"
+      IamInstanceProfile: !Ref "AirflowInstanceProfile"
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash -xe
+          mkdir /home/airflow
+          export AIRFLOW_HOME=/home/airflow
+          yum install gcc-c++ python-devel python-setuptools
+          pip install --upgrade pip
+          virtualenv airflow_virtualenv
+          cd airflow_virtualenv/bin
+          source activate
+          pip install boto3
+          pip install airflow[s3,postgres]
+          airflow initdb
+          mkdir $AIRFLOW_HOME/plugins
+          mkdir $AIRFLOW_HOME/dags
+          wget https://github.com/piotr-kalanski/airflow-aws-plugins/archive/development.zip
+          unzip development.zip
+          cp -R airflow-aws-plugins-development/aws_operators/ $AIRFLOW_HOME/plugins/aws_operators
+          cp airflow-aws-plugins-development/examples/dags/* $AIRFLOW_HOME/dags/
+          aws configure set default.region eu-central-1
+          airflow webserver -p 8080

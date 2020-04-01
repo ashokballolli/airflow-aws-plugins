@@ -1,0 +1,9 @@
+Resources:
+  RedshiftDevCluster:
+    Type: "AWS::Redshift::Cluster"
+    Properties:
+      DBName: "dev"
+      MasterUsername: "root"
+      MasterUserPassword: "r00tpoc!"
+      NodeType: "dc2.large"
+      ClusterType: "single-node"

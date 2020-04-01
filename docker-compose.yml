@@ -1,0 +1,10 @@
+version: '2'
+
+services:
+  webserver:
+    image: puckel/docker-airflow:latest
+    ports:
+        - 8080:8080
+    volumes:
+        - ./examples/dags:/usr/local/airflow/dags
+        - ./aws_operators:/usr/local/airflow/plugins/aws_operators
