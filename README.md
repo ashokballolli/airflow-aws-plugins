@@ -168,9 +168,9 @@ security_configuration (string) -- The name of the SecurityConfiguration structu
 notification_property (dict) -- Specifies configuration properties of a job run notification.
 worker_type (string) -- The type of predefined worker that is allocated when a job runs. Accepts a value of Standard, G.1X, or G.2X.
 number_of_workers (integer) -- The number of workers of a defined workerType that are allocated when a job runs.
-
-Reference: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/glue.html#Glue.Client.start_job_run
 ```
+
+**Boto3 Reference:** [Link](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/glue.html#Glue.Client.start_job_run)
 
 **Example**
 
@@ -194,6 +194,8 @@ workflow_name (string) [REQUIRED]: the name of the Glue workflow to start and mo
 polling_interval (integer) (default: 10) -- time interval, in seconds, to check the status of the job
 ```
 
+**Boto3 Reference:** [Link](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/glue.html#Glue.Client.start_workflow_run)
+
 **Example**
 
 ```python
@@ -216,6 +218,8 @@ crawler_name (string) [REQUIRED]: the name of the Glue crawler to start and moni
 polling_interval (integer) (default: 10) -- time interval, in seconds, to check the status of the job
 ```
 
+**Boto3 Reference:** [Link](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/glue.html#Glue.Client.start_crawler)
+
 **Example**
 
 ```python
@@ -236,6 +240,8 @@ Operator responsible for starting AWS Glue triggers.
 ```
 trigger_name (string) [REQUIRED]: the name of the Glue trigger to start
 ```
+
+**Boto3 Reference:** [Link](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/glue.html#Glue.Client.start_trigger)
 
 **Example**
 
@@ -262,9 +268,9 @@ polling_interval (integer) (default: 10) -- time interval, in seconds, to check 
 cdc_start_time (datetime) -- Indicates the start time for a change data capture (CDC) operation. Use either CdcStartTime or CdcStartPosition to specify when you want a CDC operation to start. Specifying both values results in an error.
 cdc_start_position (string) -- Indicates when you want a change data capture (CDC) operation to start. Use either CdcStartPosition or CdcStartTime to specify when you want a CDC operation to start. Specifying both values results in an error.
 cdc_stop_position (string) -- Indicates when you want a change data capture (CDC) operation to stop. The value can be either server time or commit time.
-
-Reference: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dms.html#DatabaseMigrationService.Client.start_replication_task
 ```
+
+**Boto3 Reference:** [Link](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dms.html#DatabaseMigrationService.Client.start_replication_task)
 
 **Example**
 
