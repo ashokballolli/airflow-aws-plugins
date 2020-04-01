@@ -251,7 +251,7 @@ glue_trigger_operator = StartGlueTriggerOperator(
 
 ### StartDMSReplicationTaskOperator
 
-Operator responsible for starting and monitoring Glue jobs.
+Operator responsible for starting a DMS replication task.
 
 **Parameters**
 
