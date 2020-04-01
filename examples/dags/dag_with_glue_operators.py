@@ -1,7 +1,7 @@
 from airflow import DAG
 from airflow.operators.dummy_operator import DummyOperator
 from aws_operators.operators.glue_operators import StartGlueJobRunOperator, \
-    StartGlueWorkflowRunOperator, StartGlueCrawlerRunOperator
+    StartGlueWorkflowRunOperator, StartGlueCrawlerOperator, StartGlueTriggerOperator
 from datetime import datetime, timedelta
 from airflow.utils.dates import days_ago
 
@@ -21,7 +21,7 @@ dag = DAG(
 
 start = DummyOperator(
     task_id='start',
-    dag=dag,
+    dag=dag
 )
 
 glue_job = StartGlueJobRunOperator(
@@ -38,13 +38,20 @@ glue_workflow = StartGlueWorkflowRunOperator(
     dag=dag
 )
 
-glue_crawler = StartGlueCrawlerRunOperator(
+glue_crawler = StartGlueCrawlerOperator(
     task_id='glue-crawler',
     crawler_name='pjain-sacramento',
     polling_interval=10,
     dag=dag
 )
 
+glue_trigger = StartGlueTriggerOperator(
+    task_id='glue-trigger',
+    trigger_name='glue-airflow-trigger',
+    dag=dag
+)
+
 start >> glue_job
 start >> glue_workflow
 start >> glue_crawler
+start >> glue_trigger
