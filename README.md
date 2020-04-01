@@ -10,7 +10,12 @@ Airflow plugin with AWS operators
         - [ExecuteLambdaOperator](#executelambdaoperator)
     - [AWS Redshift](#aws-redshift)    
         - [ExecuteRedshiftQueryOperator](#executeredshiftqueryoperator)
-        - [ExecuteCopyToRedshiftOperator](#executecopytoredshiftoperator)            
+        - [ExecuteCopyToRedshiftOperator](#executecopytoredshiftoperator)   
+    - [AWS Glue](#aws-glue)    
+        - [StartGlueJobRunOperator](#startgluejobrunoperator)
+        - [StartGlueWorkflowRunOperator](#startglueworkflowrunoperator)
+        - [StartGlueCrawlerOperator](#startgluecrawleroperator)
+        - [StartGlueTriggerOperator](#startgluetriggeroperator)
 
 # Installation
 
@@ -139,5 +144,66 @@ Example:
 ```python
 ExecuteCopyToRedshiftOperator(
     s3_key=lambda context: "year={y}/month={m}/day={d}/".format(y=context["execution_date"].year, m=context["execution_date"].strftime("%m"), d=context["execution_date"].strftime("%d"))
+)
+```
+
+## AWS Glue
+
+### StartGlueJobRunOperator
+
+Operator responsible for starting and monitoring Glue jobs.
+
+*Example:*
+
+```python
+glue_job_operator = StartGlueJobRunOperator(
+    task_id='glue_job_operator',
+    job_name='airflow',
+    polling_interval=10,
+    dag=dag
+)
+```
+
+### StartGlueWorkflowRunOperator
+
+Operator responsible for starting and monitoring Glue workflows.
+
+*Example:*
+
+```python
+glue_workflow_operator = StartGlueWorkflowRunOperator(
+    task_id='glue_workflow_operator',
+    workflow_name='airflow',
+    polling_interval=10,
+    dag=dag
+)
+```
+
+### StartGlueCrawlerOperator
+
+Operator responsible for starting and monitoring Glue crawlers.
+
+*Example:*
+
+```python
+glue_crawler_operator = StartGlueCrawlerOperator(
+    task_id='glue_crawler_operator',
+    crawler_name='airflow',
+    polling_interval=10,
+    dag=dag
+)
+```
+
+### StartGlueTriggerOperator
+
+Operator responsible for starting AWS Glue triggers.
+
+*Example:*
+
+```python
+glue_trigger_operator = StartGlueTriggerOperator(
+    task_id='glue_trigger_operator',
+    trigger_name='airflow',
+    dag=dag
 )
 ```
