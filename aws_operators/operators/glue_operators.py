@@ -33,7 +33,7 @@ class StartGlueJobRunOperator(BaseOperator):
         :param worker_type (string) -- The type of predefined worker that is allocated when a job runs. Accepts a value of Standard, G.1X, or G.2X.
         :param number_of_workers (integer) -- The number of workers of a defined workerType that are allocated when a job runs.
 
-        Additional Reference: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/glue.html#Glue.Client.start_job_run for any other parameters
+        Reference: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/glue.html#Glue.Client.start_job_run
         """
         super(StartGlueJobRunOperator, self).__init__(*args, **kwargs)
         self.job_name = job_name
@@ -80,15 +80,15 @@ class StartGlueWorkflowRunOperator(BaseOperator):
     def __init__(
             self,
             workflow_name,
-            polling_interval,
+            polling_interval=10,
             *args,
             **kwargs
     ):
         """
         Trigger AWS Glue Workflow function
 
-        :param workflow_name: the name of the Glue workflow to start and monitor
-        :param polling_interval: time interval, in seconds, to check the status of the workflow
+        :param workflow_name (string) [REQUIRED]: the name of the Glue workflow to start and monitor
+        :param polling_interval (integer) (default: 10) -- time interval, in seconds, to check the status of the job
         """
         super(StartGlueWorkflowRunOperator, self).__init__(*args, **kwargs)
         self.workflow_name = workflow_name
@@ -128,15 +128,15 @@ class StartGlueCrawlerOperator(BaseOperator):
     def __init__(
             self,
             crawler_name,
-            polling_interval,
+            polling_interval=10,
             *args,
             **kwargs
     ):
         """
         Trigger AWS Glue Crawler function
 
-        :param crawler_name: the name of the Glue crawler to start and monitor
-        :param polling_interval: time interval, in seconds, to check the status of the crawler
+        :param crawler_name (string) [REQUIRED]: the name of the Glue crawler to start and monitor
+        :param polling_interval (integer) (default: 10) -- time interval, in seconds, to check the status of the job
         """
         super(StartGlueCrawlerOperator, self).__init__(*args, **kwargs)
         self.crawler_name = crawler_name
@@ -197,7 +197,7 @@ class StartGlueTriggerOperator(BaseOperator):
         """
         Trigger AWS Glue Trigger function
 
-        :param trigger_name: the name of the Glue trigger to start
+        :param trigger_name (string) [REQUIRED]: the name of the Glue trigger to start
         """
         super(StartGlueTriggerOperator, self).__init__(*args, **kwargs)
         self.trigger_name = trigger_name

@@ -31,7 +31,7 @@ class StartDMSReplicationTaskOperator(BaseOperator):
         :param cdc_start_position (string) -- Indicates when you want a change data capture (CDC) operation to start. Use either CdcStartPosition or CdcStartTime to specify when you want a CDC operation to start. Specifying both values results in an error.
         :param cdc_stop_position (string) -- Indicates when you want a change data capture (CDC) operation to stop. The value can be either server time or commit time.
 
-        Additional Reference: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dms.html#DatabaseMigrationService.Client.start_replication_task 
+        Reference: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dms.html#DatabaseMigrationService.Client.start_replication_task
         """
         super(StartDMSReplicationTaskOperator, self).__init__(*args, **kwargs)
         self.replication_task_arn = replication_task_arn

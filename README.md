@@ -16,6 +16,8 @@ Airflow plugin with AWS operators
         - [StartGlueWorkflowRunOperator](#startglueworkflowrunoperator)
         - [StartGlueCrawlerOperator](#startgluecrawleroperator)
         - [StartGlueTriggerOperator](#startgluetriggeroperator)
+    - [AWS Database Migration Service (DMS)](#aws-database-migration-service-dms)
+        - [StartDMSReplicationTaskOperator](#startdmsreplicationtaskoperator)
 
 # Installation
 
@@ -31,7 +33,7 @@ List of operators by AWS service:
 
 Operator responsible for triggering AWS Lambda function.
 
-*Example:*
+**Example**
 
 ```python
 ExecuteLambdaOperator(
@@ -59,7 +61,7 @@ where `date` is equal to `execution_date` of airflow dag. This is extracted by `
 
 Execute Redshift query.
 
-*Example:*
+**Example**
 
 DROP Redshift table:
 
@@ -153,7 +155,24 @@ ExecuteCopyToRedshiftOperator(
 
 Operator responsible for starting and monitoring Glue jobs.
 
-*Example:*
+**Parameters**
+
+```
+job_name (string) [REQUIRED] -- the name of the Glue job to start and monitor
+polling_interval (integer) (default: 10) -- time interval, in seconds, to check the status of the job
+job_run_id (string) -- The ID of a previous JobRun to retry.
+arguments (dict) -- The job arguments specifically for this run. For this job run, they replace the default arguments set in the job definition itself.
+timeout (integer) -- The JobRun timeout in minutes.
+max_capacity (float) -- The number of AWS Glue data processing units (DPUs) that can be allocated when this job runs.
+security_configuration (string) -- The name of the SecurityConfiguration structure to be used with this job run.
+notification_property (dict) -- Specifies configuration properties of a job run notification.
+worker_type (string) -- The type of predefined worker that is allocated when a job runs. Accepts a value of Standard, G.1X, or G.2X.
+number_of_workers (integer) -- The number of workers of a defined workerType that are allocated when a job runs.
+
+Reference: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/glue.html#Glue.Client.start_job_run
+```
+
+**Example**
 
 ```python
 glue_job_operator = StartGlueJobRunOperator(
@@ -168,7 +187,14 @@ glue_job_operator = StartGlueJobRunOperator(
 
 Operator responsible for starting and monitoring Glue workflows.
 
-*Example:*
+**Parameters**
+
+```
+workflow_name (string) [REQUIRED]: the name of the Glue workflow to start and monitor
+polling_interval (integer) (default: 10) -- time interval, in seconds, to check the status of the job
+```
+
+**Example**
 
 ```python
 glue_workflow_operator = StartGlueWorkflowRunOperator(
@@ -183,7 +209,14 @@ glue_workflow_operator = StartGlueWorkflowRunOperator(
 
 Operator responsible for starting and monitoring Glue crawlers.
 
-*Example:*
+**Parameters**
+
+```
+crawler_name (string) [REQUIRED]: the name of the Glue crawler to start and monitor
+polling_interval (integer) (default: 10) -- time interval, in seconds, to check the status of the job
+```
+
+**Example**
 
 ```python
 glue_crawler_operator = StartGlueCrawlerOperator(
@@ -198,12 +231,49 @@ glue_crawler_operator = StartGlueCrawlerOperator(
 
 Operator responsible for starting AWS Glue triggers.
 
-*Example:*
+**Parameters**
+
+```
+trigger_name (string) [REQUIRED]: the name of the Glue trigger to start
+```
+
+**Example**
 
 ```python
 glue_trigger_operator = StartGlueTriggerOperator(
     task_id='glue_trigger_operator',
     trigger_name='airflow',
+    dag=dag
+)
+```
+
+## AWS Database Migration Service (DMS)
+
+### StartDMSReplicationTaskOperator
+
+Operator responsible for starting and monitoring Glue jobs.
+
+**Parameters**
+
+```
+replication_task_arn (string) [REQUIRED] -- The Amazon Resource Name (ARN) of the replication task to be started
+start_replication_task_type (string) [REQUIRED] -- The type of replication task. Possible Values include start-replication, resume-processing, reload-target
+polling_interval (integer) (default: 10) -- time interval, in seconds, to check the status of the job
+cdc_start_time (datetime) -- Indicates the start time for a change data capture (CDC) operation. Use either CdcStartTime or CdcStartPosition to specify when you want a CDC operation to start. Specifying both values results in an error.
+cdc_start_position (string) -- Indicates when you want a change data capture (CDC) operation to start. Use either CdcStartPosition or CdcStartTime to specify when you want a CDC operation to start. Specifying both values results in an error.
+cdc_stop_position (string) -- Indicates when you want a change data capture (CDC) operation to stop. The value can be either server time or commit time.
+
+Reference: https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dms.html#DatabaseMigrationService.Client.start_replication_task
+```
+
+**Example**
+
+```python
+dms_replication_task_operator = StartDMSReplicationTaskOperator(
+    task_id='dms_replication_task_operator',
+    replication_task_arn='airflow',
+    start_replication_task_type='start-replication',
+    polling_interval=10,
     dag=dag
 )
 ```

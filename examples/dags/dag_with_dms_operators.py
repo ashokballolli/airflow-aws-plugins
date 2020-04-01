@@ -26,7 +26,7 @@ start = DummyOperator(
 dms_replication = StartDMSReplicationTaskOperator(
     task_id='dms_replication',
     replication_task_arn='dms-airflow',
-    start_replication_task_type='start-replication', # Possible Values --> 'start-replication'|'resume-processing'|'reload-target'
+    start_replication_task_type='start-replication',
     polling_interval=10,
     dag=dag
 )
