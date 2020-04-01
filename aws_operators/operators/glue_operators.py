@@ -176,8 +176,10 @@ class StartGlueCrawlerOperator(BaseOperator):
 
                     # Possible values --> 'Status': 'SUCCEEDED'|'CANCELLED'|'FAILED'
                     if (final_status in ['SUCCEEDED']):
+                        logging.info("Final Crawler Status: " + str(final_status))
                         break
                     else:
+                        logging.error("Final Crawler Status: " + str(final_status))
                         logging.error(
                             "Something went wrong. Check AWS Logs. Exiting.")
                         raise AirflowException('AWS Crawler Job Run Failed')
