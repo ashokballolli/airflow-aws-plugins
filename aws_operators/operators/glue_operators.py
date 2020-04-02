@@ -66,9 +66,11 @@ class StartGlueJobRunOperator(BaseOperator):
                              str(self.polling_interval) + " seconds...\n")
                 time.sleep(self.polling_interval)
             elif (job_status in ['STOPPING', 'STOPPED', 'FAILED', 'TIMEOUT']):
+                logging.error(
+                    "Message: " + str(job_status.get("JobRun").get("ErrorMessage", "No Error Message Present")))
                 logging.error("Something went wrong. Check AWS Logs. Exiting.")
                 raise AirflowException('AWS Glue Job Run Failed')
-            else:
+            else:                
                 break
 
 
@@ -106,18 +108,38 @@ class StartGlueWorkflowRunOperator(BaseOperator):
         while True:
             workflow_status = self.glue_client.get_workflow_run(
                 Name=self.workflow_name, RunId=glue_workflow_id)['Run']['Status']
-            logging.info("Workflow Status: " + str(workflow_status))
-
-            # Possible values --> 'Status': 'RUNNING'|'COMPLETED'
-            if (workflow_status in ['STARTING', 'RUNNING']):
+            if (workflow_status != "COMPLETED"):
+                logging.info("Workflow Status: " + str(workflow_status))
+                logging.info("Workflow Stats: " +
+                             str(workflow_status['Run']['Statistics']))
                 logging.info("Sleeping for " +
                              str(self.polling_interval) + " seconds...\n")
                 time.sleep(self.polling_interval)
-            elif (workflow_status in ['STOPPING', 'STOPPED', 'FAILED', 'TIMEOUT']):
-                logging.error("Something went wrong. Check AWS Logs. Exiting.")
-                raise AirflowException('AWS Glue Workflow Run Failed')
             else:
-                break
+                total_actions = workflow_status['Run']['Statistics']['TotalActions']
+                succeeded_actions = workflow_status['Run']['Statistics']['SucceededActions']
+
+                if (succeeded_actions != total_actions):
+                    logging.error("All actions did NOT succeed.")
+                    for entry in (workflow_status['Run']['Graph']['Nodes']):
+                        output = entry['Type'] + ": " + entry['Name'] + " --> "
+                        if (entry['Type'] == "JOB"):
+                            try:
+                                output += entry['JobDetails']['JobRuns'][-1]['JobRunState']
+                            except KeyError as e:
+                                output += "Job state not available"
+                            print(output)
+                        if (entry['Type'] == "CRAWLER"):
+                            try:
+                                output += entry['CrawlerDetails']['Crawls'][-1]['State']
+                            except KeyError as e:
+                                output += "Crawler state not available"
+                            print(output)
+                    logging.error("Check AWS Logs. Exiting.")
+                    raise AirflowException('AWS Glue Workflow Run Failed')
+                else:
+                    logging.info("All actions succeeded.")
+                    break
 
 
 class StartGlueCrawlerOperator(BaseOperator):
@@ -176,12 +198,16 @@ class StartGlueCrawlerOperator(BaseOperator):
 
                     # Possible values --> 'Status': 'SUCCEEDED'|'CANCELLED'|'FAILED'
                     if (final_status in ['SUCCEEDED']):
-                        logging.info("Final Crawler Status: " + str(final_status))
+                        logging.info("Final Crawler Status: " +
+                                     str(final_status))
                         break
                     else:
-                        logging.error("Final Crawler Status: " + str(final_status))
                         logging.error(
-                            "Something went wrong. Check AWS Logs. Exiting.")
+                            "Final Crawler Status: " + str(final_status))
+                        logging.error("Message: " + str(final_status.get("Crawler").get(
+                            "LastCrawl").get("ErrorMessage", "No Error Message Present")))
+                        logging.error(
+                            "Check AWS Logs. Exiting.")
                         raise AirflowException('AWS Crawler Job Run Failed')
 
 
