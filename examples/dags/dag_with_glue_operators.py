@@ -10,7 +10,7 @@ default_args = {
     'depends_on_past': False,
     'start_date': days_ago(2),
     'retries': 1,
-    'retry_delay': timedelta(minutes=5),
+    'retry_delay': timedelta(minutes=1),
 }
 dag = DAG(
     'dag_with_glue_operators',
@@ -24,34 +24,34 @@ start = DummyOperator(
     dag=dag
 )
 
-glue_job = StartGlueJobRunOperator(
-    task_id='glue-job',
-    job_name='glue-airflow',
+glue_job_operator = StartGlueJobRunOperator(
+    task_id='glue_job_operator',
+    job_name='airflow',
     polling_interval=10,
     dag=dag
 )
 
-glue_workflow = StartGlueWorkflowRunOperator(
-    task_id='glue-workflow',
-    workflow_name='glue-workflow',
+glue_workflow_operator = StartGlueWorkflowRunOperator(
+    task_id='glue_workflow_operator',
+    workflow_name='airflow',
     polling_interval=10,
     dag=dag
 )
 
-glue_crawler = StartGlueCrawlerOperator(
-    task_id='glue-crawler',
-    crawler_name='pjain-sacramento',
+glue_crawler_operator = StartGlueCrawlerOperator(
+    task_id='glue_crawler_operator',
+    crawler_name='airflow',
     polling_interval=10,
     dag=dag
 )
 
-glue_trigger = StartGlueTriggerOperator(
-    task_id='glue-trigger',
-    trigger_name='glue-airflow-trigger',
+glue_trigger_operator = StartGlueTriggerOperator(
+    task_id='glue_trigger_operator',
+    trigger_name='airflow',
     dag=dag
 )
 
-start >> glue_job
-start >> glue_workflow
-start >> glue_crawler
-start >> glue_trigger
+start >> glue_job_operator
+start >> glue_workflow_operator
+start >> glue_crawler_operator
+start >> glue_trigger_operator

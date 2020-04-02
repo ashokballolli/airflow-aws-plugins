@@ -9,7 +9,7 @@ default_args = {
     'depends_on_past': False,
     'start_date': days_ago(2),
     'retries': 1,
-    'retry_delay': timedelta(minutes=5),
+    'retry_delay': timedelta(minutes=1),
 }
 dag = DAG(
     'dag_with_dms_operators',
@@ -23,12 +23,12 @@ start = DummyOperator(
     dag=dag,
 )
 
-dms_replication = StartDMSReplicationTaskOperator(
-    task_id='dms_replication',
-    replication_task_arn='dms-airflow',
+dms_replication_task_operator = StartDMSReplicationTaskOperator(
+    task_id='dms_replication_task_operator',
+    replication_task_arn='airflow',
     start_replication_task_type='start-replication',
     polling_interval=10,
     dag=dag
 )
 
-start >> dms_replication
+start >> dms_replication_task_operator
