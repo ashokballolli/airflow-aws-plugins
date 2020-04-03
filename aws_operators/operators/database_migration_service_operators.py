@@ -66,14 +66,34 @@ class StartDMSReplicationTaskOperator(BaseOperator):
                          str(describe_replication_tasks_response) + "\n")
             replication_task_status = describe_replication_tasks_response.get(
                 "ReplicationTasks", [{}])[0].get("Status", None)
+            replication_task_progress = describe_replication_tasks_response.get(
+                "ReplicationTasks", [{}])[0].get("ReplicationTaskStats", {}).get("FullLoadProgressPercent", None)
             logging.info("Current Status: " +
                          str(replication_task_status) + "\n")
+            logging.info("Current Load Progress: " +
+                         str(replication_task_progress) + "\n")
             if replication_task_status in (None, "failed"):
                 logging.error("The Replication Task Failed\n")
                 raise AirflowException('The Replication Task Failed')
-            if replication_task_status in ("success"):
+            elif replication_task_status in ("stopped"):
+                replication_task_stats = describe_replication_tasks_response.get(
+                    "ReplicationTasks", [{}])[0].get("ReplicationTaskStats", {})
+                logging.info(replication_task_stats)
+                logging.info("Replication Task Stats: " +
+                             str(replication_task_stats))
+                tables_errored = describe_replication_tasks_response.get(
+                    "ReplicationTasks", [{}])[0].get("ReplicationTaskStats", {}).get("TablesErrored", None)
+                if (tables_errored != 0):
+                    logging.error("Count of Errored Tables: " +
+                                  str(tables_errored))
+                    raise AirflowException(
+                        "The Replication Task DID NOT FULLY succeed.")
                 logging.info("The Replication Task Succeeded\n")
                 break
+            else:
+                logging.info("Unknown status. Exiting.\n")
+                break
+
             logging.info("Sleeping for " +
                          str(self.polling_interval) + " seconds...\n")
             time.sleep(self.polling_interval)
