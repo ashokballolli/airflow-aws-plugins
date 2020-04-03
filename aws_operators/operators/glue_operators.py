@@ -38,6 +38,8 @@ class StartGlueJobRunOperator(BaseOperator):
         super(StartGlueJobRunOperator, self).__init__(*args, **kwargs)
         self.job_name = job_name
         self.polling_interval = polling_interval
+        self.__dict__.update(kwargs)
+
         self.glue_client = boto3.client('glue')
 
         self.pascalized_args = {humps.pascalize(
@@ -48,6 +50,8 @@ class StartGlueJobRunOperator(BaseOperator):
             boto3_glue_arguments).intersection(self.pascalized_args.keys())}
 
     def execute(self, context):
+
+        logging.info(self.func_args)
         start_glue_job_response = self.glue_client.start_job_run(
             **self.func_args)
         logging.info(start_glue_job_response)
@@ -70,7 +74,7 @@ class StartGlueJobRunOperator(BaseOperator):
                     "Message: " + str(job_status.get("JobRun").get("ErrorMessage", "No Error Message Present")))
                 logging.error("Something went wrong. Check AWS Logs. Exiting.")
                 raise AirflowException('AWS Glue Job Run Failed')
-            else:                
+            else:
                 break
 
 

@@ -36,6 +36,8 @@ class StartDMSReplicationTaskOperator(BaseOperator):
         self.replication_task_arn = replication_task_arn
         self.start_replication_task_type = start_replication_task_type
         self.polling_interval = polling_interval
+        self.__dict__.update(kwargs)
+
         self.dms_client = boto3.client('dms')
 
         self.pascalized_args = {humps.pascalize(
@@ -46,12 +48,18 @@ class StartDMSReplicationTaskOperator(BaseOperator):
             boto3_dms_arguments).intersection(self.pascalized_args.keys())}
 
     def execute(self, context):
+
+        logging.info(self.func_args)
         start_replication_task_response = self.dms_client.start_replication_task(
-            ReplicationTaskArn=self.replication_task_arn, StartReplicationTaskType=self.start_replication_task_type)
+            **self.func_args)
+        logging.info(start_replication_task_response)
+
         replication_task_arn = start_replication_task_response.get(
             "ReplicationTask", {}).get("ReplicationTaskArn", {})
         logging.info("replication_task_arn: " +
                      str(replication_task_arn) + "\n")
+
+        # Possible values --> 'Status': 'starting'|'running'|'stopping'
         if start_replication_task_response.get("ReplicationTask", {}).get("Status", {}) != "starting":
             logging.error("Failed to Start the Replication Task\n")
             raise AirflowException('Failed to Start the Replication Task')
