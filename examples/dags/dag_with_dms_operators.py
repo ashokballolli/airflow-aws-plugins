@@ -11,24 +11,18 @@ default_args = {
     'retries': 1,
     'retry_delay': timedelta(minutes=1),
 }
-dag = DAG(
-    'dag_with_dms_operators',
-    default_args=default_args,
-    description='Sample DAG with AWS Data Migration Service (DMS) operators',
-    schedule_interval=None,
-)
 
-start = DummyOperator(
-    task_id='start',
-    dag=dag,
-)
+with DAG('dag_with_dms_operators', default_args=default_args, description='Sample DAG with AWS Data Migration Service (DMS) operators', schedule_interval=None) as dag:
 
-dms_replication_task_operator = StartDMSReplicationTaskOperator(
-    task_id='dms_replication_task_operator',
-    replication_task_arn='airflow',
-    start_replication_task_type='start-replication',
-    polling_interval=10,
-    dag=dag
-)
+    start = DummyOperator(
+        task_id='start',
+    )
 
-start >> dms_replication_task_operator
+    dms_replication_task_operator = StartDMSReplicationTaskOperator(
+        task_id='dms_replication_task_operator',
+        replication_task_arn='arn:partition:service:region:account-id:resource-type:resource-id',
+        start_replication_task_type='start-replication',
+        polling_interval=10,
+    )
+
+    start >> dms_replication_task_operator
