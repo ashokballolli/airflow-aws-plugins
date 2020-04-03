@@ -49,19 +49,21 @@ class StartDMSReplicationTaskOperator(BaseOperator):
 
     def execute(self, context):
 
-        logging.info("start_replication_task Arguments: " + str(self.func_args))
+        logging.info("start_replication_task Arguments: " +
+                     str(self.func_args))
         start_replication_task_response = self.dms_client.start_replication_task(
             **self.func_args)
-        logging.info("start_replication_task Response: " + str(start_replication_task_response))
+        logging.info("start_replication_task Response: " +
+                     str(start_replication_task_response))
 
         replication_task_arn = start_replication_task_response.get(
             "ReplicationTask", {}).get("ReplicationTaskArn", {})
         logging.info("replication_task_arn: " +
-                     str(replication_task_arn) + "\n")
+                     str(replication_task_arn))
 
         # Possible values --> 'Status': 'starting'|'running'|'stopping'
         if start_replication_task_response.get("ReplicationTask", {}).get("Status", {}) != "starting":
-            logging.error("Failed to Start the Replication Task\n")
+            logging.error("Failed to Start the Replication Task")
             raise AirflowException('Failed to Start the Replication Task')
         while True:
             describe_replication_tasks_response = self.dms_client.describe_replication_tasks(
@@ -71,11 +73,11 @@ class StartDMSReplicationTaskOperator(BaseOperator):
             replication_task_progress = describe_replication_tasks_response.get(
                 "ReplicationTasks", [{}])[-1].get("ReplicationTaskStats", {}).get("FullLoadProgressPercent", None)
             logging.info("Current Status: " +
-                         str(replication_task_status) + "\n")
+                         str(replication_task_status))
             logging.info("Current Load Progress: " +
-                         str(replication_task_progress) + "\n")
+                         str(replication_task_progress))
             if replication_task_status in (None, "failed"):
-                logging.error("The Replication Task Failed\n")
+                logging.error("The Replication Task Failed")
                 raise AirflowException('The Replication Task Failed')
             elif replication_task_status in ("stopped"):
                 replication_task_stats = describe_replication_tasks_response.get(
@@ -89,9 +91,9 @@ class StartDMSReplicationTaskOperator(BaseOperator):
                                   str(tables_errored))
                     raise AirflowException(
                         "The Replication Task DID NOT FULLY succeed.")
-                logging.info("The Replication Task Succeeded\n")
+                logging.info("The Replication Task Succeeded")
                 break
             else:
                 logging.info("Sleeping for " +
-                             str(self.polling_interval) + " seconds...\n")
+                             str(self.polling_interval) + " seconds...")
                 time.sleep(self.polling_interval)

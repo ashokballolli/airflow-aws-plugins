@@ -54,7 +54,8 @@ class StartGlueJobRunOperator(BaseOperator):
         logging.info("start_job_run Arguments: " + str(self.func_args))
         start_glue_job_response = self.glue_client.start_job_run(
             **self.func_args)
-        logging.info("start_glue_job Response: " + str(start_glue_job_response))
+        logging.info("start_glue_job Response: " +
+                     str(start_glue_job_response))
 
         glue_job_id = start_glue_job_response['JobRunId']
         logging.info("Glue Job ID: " + str(glue_job_id))
@@ -68,7 +69,7 @@ class StartGlueJobRunOperator(BaseOperator):
             # Possible values --> 'JobRunState': 'STARTING'|'RUNNING'|'STOPPING'|'STOPPED'|'SUCCEEDED'|'FAILED'|'TIMEOUT'
             if (job_status in ['STARTING', 'RUNNING']):
                 logging.info("Sleeping for " +
-                             str(self.polling_interval) + " seconds...\n")
+                             str(self.polling_interval) + " seconds...")
                 time.sleep(self.polling_interval)
             elif (job_status in ['STOPPING', 'STOPPED', 'FAILED', 'TIMEOUT']):
                 logging.error(
@@ -106,7 +107,8 @@ class StartGlueWorkflowRunOperator(BaseOperator):
     def execute(self, context):
         start_glue_workflow_response = self.glue_client.start_workflow_run(
             Name=self.workflow_name)
-        logging.info("start_glue_workflow Response: " + str(start_glue_workflow_response))
+        logging.info("start_glue_workflow Response: " +
+                     str(start_glue_workflow_response))
 
         glue_workflow_id = start_glue_workflow_response['RunId']
         logging.info("Glue Workflow ID: " + str(glue_workflow_id))
@@ -120,7 +122,7 @@ class StartGlueWorkflowRunOperator(BaseOperator):
                 logging.info("Workflow Stats: " +
                              str(workflow_response['Run']['Statistics']))
                 logging.info("Sleeping for " +
-                             str(self.polling_interval) + " seconds...\n")
+                             str(self.polling_interval) + " seconds...")
                 time.sleep(self.polling_interval)
             else:
                 total_actions = workflow_response['Run']['Statistics']['TotalActions']
@@ -182,7 +184,8 @@ class StartGlueCrawlerOperator(BaseOperator):
 
         start_glue_crawler_response = self.glue_client.start_crawler(
             Name=self.crawler_name)
-        logging.info("start_glue_crawler Response: " + str(start_glue_crawler_response))
+        logging.info("start_glue_crawler Response: " +
+                     str(start_glue_crawler_response))
 
         while True:
             crawler_status = self.glue_client.get_crawler(
@@ -192,14 +195,14 @@ class StartGlueCrawlerOperator(BaseOperator):
             # Possible values --> 'State': 'READY'|'RUNNING'|'STOPPING'
             if (crawler_status in ['RUNNING']):
                 logging.info("Sleeping for " +
-                             str(self.polling_interval) + " seconds...\n")
+                             str(self.polling_interval) + " seconds...")
                 time.sleep(self.polling_interval)
             elif (crawler_status in ['STOPPING', 'READY']):
                 last_crawl_at_stopping = self.glue_client.get_crawler(Name=self.crawler_name)[
                     'Crawler']['LastCrawl']
                 if (last_crawl_before_starting == last_crawl_at_stopping):
                     logging.info("Sleeping for " +
-                                 str(self.polling_interval) + " seconds...\n")
+                                 str(self.polling_interval) + " seconds...")
                     time.sleep(self.polling_interval)
                 else:
                     final_response = self.glue_client.get_crawler(
@@ -244,4 +247,5 @@ class StartGlueTriggerOperator(BaseOperator):
     def execute(self, context):
         start_glue_trigger_response = self.glue_client.start_trigger(
             Name=self.trigger_name)
-        logging.info("start_glue_trigger Response: " + str(start_glue_trigger_response))
+        logging.info("start_glue_trigger Response: " +
+                     str(start_glue_trigger_response))
