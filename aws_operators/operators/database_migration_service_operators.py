@@ -49,10 +49,10 @@ class StartDMSReplicationTaskOperator(BaseOperator):
 
     def execute(self, context):
 
-        logging.info(self.func_args)
+        logging.info("start_replication_task Arguments: " + str(self.func_args))
         start_replication_task_response = self.dms_client.start_replication_task(
             **self.func_args)
-        logging.info(start_replication_task_response)
+        logging.info("start_replication_task Response: " + str(start_replication_task_response))
 
         replication_task_arn = start_replication_task_response.get(
             "ReplicationTask", {}).get("ReplicationTaskArn", {})

@@ -51,10 +51,10 @@ class StartGlueJobRunOperator(BaseOperator):
 
     def execute(self, context):
 
-        logging.info(self.func_args)
+        logging.info("start_job_run Arguments: " + str(self.func_args))
         start_glue_job_response = self.glue_client.start_job_run(
             **self.func_args)
-        logging.info(start_glue_job_response)
+        logging.info("start_glue_job Response: " + str(start_glue_job_response))
 
         glue_job_id = start_glue_job_response['JobRunId']
         logging.info("Glue Job ID: " + str(glue_job_id))
@@ -76,6 +76,7 @@ class StartGlueJobRunOperator(BaseOperator):
                 logging.error("Check AWS Logs. Exiting.")
                 raise AirflowException('AWS Glue Job Run Failed')
             else:
+                logging.info("The glue job SUCCEEDED. Exiting.")
                 break
 
 
