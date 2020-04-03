@@ -20,7 +20,8 @@ with DAG('dag_with_execute_copy_to_redshift_operator', start_date=datetime(2018,
             task_id='redshift_copy_overwrite',
             redshift_conn_id='redshift_dev',
             s3_bucket='it-metrics-dicts-dw-stst',
-            s3_key=lambda c: "year={}/month={}/epics.json".format(c['execution_date'].year, c['execution_date'].strftime('%m')),
+            s3_key=lambda c: "year={}/month={}/epics.json".format(
+                c['execution_date'].year, c['execution_date'].strftime('%m')),
             redshift_schema='public',
             redshift_table='test_epics',
             iam_role='arn:aws:iam::664994689501:role/ItMetricsCopyRedshiftExecutionRole',
@@ -31,12 +32,14 @@ with DAG('dag_with_execute_copy_to_redshift_operator', start_date=datetime(2018,
             task_id='redshift_copy_append_overwrite',
             redshift_conn_id='redshift_dev',
             s3_bucket='it-metrics-presentation-dw-stst',
-            s3_key=lambda c: "timesheet/year={}/month={}/day={}".format(c['execution_date'].year, c['execution_date'].strftime('%m'), c['execution_date'].strftime('%d')),
+            s3_key=lambda c: "timesheet/year={}/month={}/day={}".format(
+                c['execution_date'].year, c['execution_date'].strftime('%m'), c['execution_date'].strftime('%d')),
             redshift_schema='public',
             redshift_table='test_worklogs',
             iam_role='arn:aws:iam::664994689501:role/ItMetricsCopyRedshiftExecutionRole',
             mode='append_overwrite',
-            where_condition_fn=lambda c: "date_activity = '{}'".format(c['execution_date'].strftime('%Y-%m-%d')),
+            where_condition_fn=lambda c: "date_activity = '{}'".format(
+                c['execution_date'].strftime('%Y-%m-%d')),
             copy_params=["json 'auto'"]
         )
     )
