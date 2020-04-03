@@ -33,6 +33,7 @@ Airflow plugin with AWS operators
 
 `aws configure`
 
+##### An in-depth guide on Getting Started with Boto3 & AWS: [Link](https://boto3.amazonaws.com/v1/documentation/api/latest/guide/quickstart.html)
 
 # Operators
 
