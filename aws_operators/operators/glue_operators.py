@@ -44,7 +44,7 @@ class StartGlueJobRunOperator(BaseOperator):
 
         self.pascalized_args = {humps.pascalize(
             k): v for k, v in self.__dict__.items()}
-        boto3_glue_arguments = ['JobRunId', 'Arguments', 'Timeout', 'MaxCapacity',
+        boto3_glue_arguments = ['JobName', 'JobRunId', 'Arguments', 'Timeout', 'MaxCapacity',
                                 'SecurityConfiguration', 'NotificationProperty', 'WorkerType', 'NumberOfWorkers']
         self.func_args = {key: self.pascalized_args[key] for key in set(
             boto3_glue_arguments).intersection(self.pascalized_args.keys())}
@@ -60,8 +60,9 @@ class StartGlueJobRunOperator(BaseOperator):
         logging.info("Glue Job ID: " + str(glue_job_id))
 
         while True:
-            job_status = self.glue_client.get_job_run(
-                JobName=self.job_name, RunId=glue_job_id)['JobRun']['JobRunState']
+            job_response = self.glue_client.get_job_run(
+                JobName=self.job_name, RunId=glue_job_id)
+            job_status = job_response['JobRun']['JobRunState']
             logging.info("Job Status: " + str(job_status))
 
             # Possible values --> 'JobRunState': 'STARTING'|'RUNNING'|'STOPPING'|'STOPPED'|'SUCCEEDED'|'FAILED'|'TIMEOUT'
@@ -71,8 +72,8 @@ class StartGlueJobRunOperator(BaseOperator):
                 time.sleep(self.polling_interval)
             elif (job_status in ['STOPPING', 'STOPPED', 'FAILED', 'TIMEOUT']):
                 logging.error(
-                    "Message: " + str(job_status.get("JobRun").get("ErrorMessage", "No Error Message Present")))
-                logging.error("Something went wrong. Check AWS Logs. Exiting.")
+                    "Message: " + str(job_response.get("JobRun").get("ErrorMessage", "No Error Message Present")))
+                logging.error("Check AWS Logs. Exiting.")
                 raise AirflowException('AWS Glue Job Run Failed')
             else:
                 break
@@ -110,22 +111,23 @@ class StartGlueWorkflowRunOperator(BaseOperator):
         logging.info("Glue Workflow ID: " + str(glue_workflow_id))
 
         while True:
-            workflow_status = self.glue_client.get_workflow_run(
-                Name=self.workflow_name, RunId=glue_workflow_id)['Run']['Status']
+            workflow_response = self.glue_client.get_workflow_run(
+                Name=self.workflow_name, RunId=glue_workflow_id)
+            workflow_status = workflow_response['Run']['Status']
             if (workflow_status != "COMPLETED"):
                 logging.info("Workflow Status: " + str(workflow_status))
                 logging.info("Workflow Stats: " +
-                             str(workflow_status['Run']['Statistics']))
+                             str(workflow_response['Run']['Statistics']))
                 logging.info("Sleeping for " +
                              str(self.polling_interval) + " seconds...\n")
                 time.sleep(self.polling_interval)
             else:
-                total_actions = workflow_status['Run']['Statistics']['TotalActions']
-                succeeded_actions = workflow_status['Run']['Statistics']['SucceededActions']
+                total_actions = workflow_response['Run']['Statistics']['TotalActions']
+                succeeded_actions = workflow_response['Run']['Statistics']['SucceededActions']
 
                 if (succeeded_actions != total_actions):
                     logging.error("All actions did NOT succeed.")
-                    for entry in (workflow_status['Run']['Graph']['Nodes']):
+                    for entry in (workflow_response['Run']['Graph']['Nodes']):
                         output = entry['Type'] + ": " + entry['Name'] + " --> "
                         if (entry['Type'] == "JOB"):
                             try:
