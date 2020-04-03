@@ -106,7 +106,7 @@ class StartGlueWorkflowRunOperator(BaseOperator):
     def execute(self, context):
         start_glue_workflow_response = self.glue_client.start_workflow_run(
             Name=self.workflow_name)
-        logging.info(start_glue_workflow_response)
+        logging.info("start_glue_workflow Response: " + str(start_glue_workflow_response))
 
         glue_workflow_id = start_glue_workflow_response['RunId']
         logging.info("Glue Workflow ID: " + str(glue_workflow_id))
@@ -133,15 +133,17 @@ class StartGlueWorkflowRunOperator(BaseOperator):
                         if (entry['Type'] == "JOB"):
                             try:
                                 output += entry['JobDetails']['JobRuns'][-1]['JobRunState']
+                                logging.info(output)
                             except KeyError as e:
                                 output += "Job state not available"
-                            print(output)
+                                logging.warn(output)
                         if (entry['Type'] == "CRAWLER"):
                             try:
                                 output += entry['CrawlerDetails']['Crawls'][-1]['State']
+                                logging.info(output)
                             except KeyError as e:
                                 output += "Crawler state not available"
-                            print(output)
+                                logging.warn(output)
                     logging.error("Check AWS Logs. Exiting.")
                     raise AirflowException('AWS Glue Workflow Run Failed')
                 else:
@@ -180,7 +182,7 @@ class StartGlueCrawlerOperator(BaseOperator):
 
         start_glue_crawler_response = self.glue_client.start_crawler(
             Name=self.crawler_name)
-        logging.info(start_glue_crawler_response)
+        logging.info("start_glue_crawler Response: " + str(start_glue_crawler_response))
 
         while True:
             crawler_status = self.glue_client.get_crawler(
@@ -242,4 +244,4 @@ class StartGlueTriggerOperator(BaseOperator):
     def execute(self, context):
         start_glue_trigger_response = self.glue_client.start_trigger(
             Name=self.trigger_name)
-        logging.info(start_glue_trigger_response)
+        logging.info("start_glue_trigger Response: " + str(start_glue_trigger_response))
