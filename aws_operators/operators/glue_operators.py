@@ -197,8 +197,9 @@ class StartGlueCrawlerOperator(BaseOperator):
                                  str(self.polling_interval) + " seconds...\n")
                     time.sleep(self.polling_interval)
                 else:
-                    final_status = self.glue_client.get_crawler(Name=self.crawler_name)[
-                        'Crawler']['LastCrawl']['Status']
+                    final_response = self.glue_client.get_crawler(
+                        Name=self.crawler_name)
+                    final_status = final_response['Crawler']['LastCrawl']['Status']
 
                     # Possible values --> 'Status': 'SUCCEEDED'|'CANCELLED'|'FAILED'
                     if (final_status in ['SUCCEEDED']):
@@ -208,7 +209,7 @@ class StartGlueCrawlerOperator(BaseOperator):
                     else:
                         logging.error(
                             "Final Crawler Status: " + str(final_status))
-                        logging.error("Message: " + str(final_status.get("Crawler").get(
+                        logging.error("Message: " + str(final_response.get("Crawler").get(
                             "LastCrawl").get("ErrorMessage", "No Error Message Present")))
                         logging.error(
                             "Check AWS Logs. Exiting.")
